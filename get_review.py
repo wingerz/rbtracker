@@ -2,9 +2,11 @@ import argparse
 import json
 import os
 import os.path
+import pprint
 import sys
 import time
 
+from rbtools.api.errors import APIError
 from rbtools.api.client import RBClient
 
 REVIEW_REQUEST_SIMPLE_KEYS = [
@@ -25,6 +27,7 @@ REVIEW_REQUEST_LIST_KEYS = [
 
 def get_review_data(root, review_id):
     review_request = root.get_review_request(review_request_id=review_id)
+        
     data = {
         'review_id': review_id,
     }
@@ -103,11 +106,18 @@ if __name__ == "__main__":
 
     review_id = params.start
     root = RBClient('https://reviewboard.yelpcorp.com', cookie_file='cookie.txt').get_root()
+    errors = []
     for _ in xrange(params.limit):
         print "getting review %s" % review_id
-        review_request = get_review_data(root, review_id)
-        with open(os.path.join(params.output, "%s.json" % review_id), 'w') as f:
-            print >>f, json.dumps(review_request)
 
+        try:
+            review_request = get_review_data(root, review_id)
+            with open(os.path.join(params.output, "%s.json" % review_id), 'w') as f:
+                print >>f, json.dumps(review_request)
+        except APIError, e:
+            print "%d: %s" % (review_id, e.rsp)
+            errors.append((review_id, e.rsp))
+            
         time.sleep(params.sleepms / 1000.)
         review_id -= 1
+    pprint.pprint(errors)
