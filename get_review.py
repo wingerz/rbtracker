@@ -44,6 +44,29 @@ def get_review_data(root, review_id):
         })
     data['changes'] = change_data
         
+    # get diffs
+    diffs = list(review_request.get_diffs())
+    all_diff_data = []
+    for diff in diffs:
+        diff_data = {
+            'id': diff['id'],
+            'timestamp': diff['timestamp'],
+        }
+
+        files = diff.get_files()
+        file_data = []
+        for file in files:
+            file_data.append({
+                'source_file': file['source_file'],
+                'dest_file': file['dest_file'],
+                'id': file['id']
+            })
+        diff_data['files'] = file_data
+        
+        all_diff_data.append(diff_data)
+
+    data['diffs'] = all_diff_data
+        
     # get reviews
     reviews = list(review_request.get_reviews())
     review_data = []
