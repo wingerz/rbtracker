@@ -36,6 +36,9 @@ def get_review_data(root, review_id):
     for key, f in REVIEW_REQUEST_LIST_KEYS:
         data[key] = [f(item) for item in review_request[key]]
 
+    username = review_request.get_submitter()['username']
+    data['username'] = username
+        
     # get changes
     changes = list(review_request.get_changes())
     change_data = []
@@ -75,12 +78,14 @@ def get_review_data(root, review_id):
     review_data = []
     for review in reviews:
         comment_count = review.get_diff_comments(counts_only=True)['count']
+        username = review.get_user()['username']
         review_data.append({
             'comment_count': comment_count,
             'ship_it': review['ship_it'],
             'public': review['public'],
             'timestamp': review['timestamp'],
             'id': review['id'],
+            'username': username,
         })
     data['reviews'] = review_data
     return data
