@@ -1,0 +1,6 @@
+{
+  "directory": "static/bower_components",
+  "dependencides": {
+    "datatables": "1.9.4"
+  }
+}

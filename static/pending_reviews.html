@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <style type="text/css" title="currentStyle">
+      @import "bower_components/datatables/media/css/demo_table.css";
+    </style>
+    </head
+
+  <body>
+
+    Team Filter: <span id="team"></span>
+
+    <table id="example" class="display">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>team</th>
+          <th>from</th>
+          <th>to</th>
+          <th>age (days)</th>
+          <th></th>
+          <th>diffs</th>
+          <th>reviews</th>
+          <th>files</th>
+          <th>max comments</th>
+          <th>summary</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+    <script src="bower_components/datatables/media/js/jquery.js"></script>
+    <script src="bower_components/datatables/media/js/jquery.dataTables.js"></script>
+    <script src="util.js"></script>
+    <script type="text/javascript">
+$(document).ready(function() {
+
+	var oTable = $('#example').dataTable( {
+		"bProcessing": true,
+		"bPaginate": false,
+		"sAjaxSource": 'pending_reviews_datatable.json',
+"fnInitComplete": function(oSettings) {
+$("#team").html(fnCreateSelect( oSettings.oInstance.fnGetColumnData(1) ));
+        $('select', $('#team')).change( function () {
+            oSettings.oInstance.fnFilter( $(this).val(), 1 );
+        } );
+
+},
+		"aoColumns": [
+			{ "mData": "id" },
+			{ "mData": "team" },
+			{ "mData": "from" },
+			{ "mData": "to", "sWidth": "20%" },
+			{ "mData": "days_since_request" },
+			{ "mData": "days_since_response" },
+			{ "mData": "num_diffs" },
+			{ "mData": "num_reviews" },
+			{ "mData": "max_files" },
+			{ "mData": "max_comments" },
+			{ "mData": "summary", "sWidth": "40%" },
+],
+"aoColumnDefs": [
+{
+"mRender": Review.Formatter.toRBLink,
+"aTargets": [0]
+},
+{
+"mRender": Review.Formatter.float,
+"aTargets": [4, 5]
+}
+
+]
+
+	} );
+
+
+
+} );
+  </script>
+
+
+
+</html>
