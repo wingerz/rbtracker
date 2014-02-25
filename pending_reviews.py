@@ -24,17 +24,25 @@ def summarize_review_info(review_info):
         'num_diffs': len(request_info['diffs']),
         'max_comments': max([review['comment_count'] for review in request_info['reviews']]) if request_info['reviews'] else 0,
         'max_files': max([len(diff['files']) if diff['files'] else 0 for diff in request_info['diffs']]),
+        'shipped': any([review['ship_it'] for review in request_info['reviews']]) if request_info['reviews'] else False,
     }
 
     days_since_response = None
     if not request_info['reviews']:
         days_since_response = rb_util.total_days(datetime.datetime.now() - last_diff_datetime)
+        waiting_for_review = True
     else:
         last_review = request_info['reviews'][-1]
         last_review_datetime = datetime.datetime.strptime(last_review['timestamp'], rb_util.DATETIME_FORMAT)
-        days_since_response = rb_util.total_days(datetime.datetime.now() - last_diff_datetime)
+        if last_diff_datetime > last_review_datetime:
+            days_since_response = rb_util.total_days(datetime.datetime.now() - last_diff_datetime)
+            waiting_for_review = True
+        else:
+            days_since_response = rb_util.total_days(datetime.datetime.now() - last_review_datetime)
+            waiting_for_review = False
 
     review_summary['days_since_response'] = days_since_response
+    review_summary['waiting_for_review'] = waiting_for_review
     return review_summary
 
 

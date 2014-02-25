@@ -16,6 +16,7 @@
           <th>team</th>
           <th>from</th>
           <th>to</th>
+          <th>waiting for review</th>
           <th>age (days)</th>
           <th></th>
           <th>diffs</th>
@@ -49,6 +50,7 @@ $("#team").html(fnCreateSelect( oSettings.oInstance.fnGetColumnData(1) ));
 			{ "mData": "team" },
 			{ "mData": "from" },
 			{ "mData": "to", "sWidth": "20%" },
+			{ "mData": "waiting_for_review" },
 			{ "mData": "days_since_request" },
 			{ "mData": "days_since_response" },
 			{ "mData": "num_diffs" },
@@ -64,7 +66,7 @@ $("#team").html(fnCreateSelect( oSettings.oInstance.fnGetColumnData(1) ));
 },
 {
 "mRender": Review.Formatter.float,
-"aTargets": [4, 5]
+"aTargets": [5, 6]
 }
 
 ]
