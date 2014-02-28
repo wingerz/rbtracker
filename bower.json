@@ -1,8 +1,8 @@
 {
   "name": "reviewboard tracker",
-  "directory": "static/bower_components",
   "dependencies": {
-    "datatables": "1.9.4"
+    "datatables": "1.9.4",
+    "d3": "3.4.3"
   },
   "version": "0.0.1",
   "homepage": "https://github.com/wingerz/rbtracker",
