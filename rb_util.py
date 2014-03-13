@@ -21,6 +21,15 @@ REVIEW_REQUEST_LIST_KEYS = [
     ('bugs_closed', lambda item: item)
 ]
 
+COMMENT_SIMPLE_KEYS = [
+    'issue_opened',
+    'num_lines',
+    'timestamp',
+    'text',
+    'first_line',
+    'issue_status',
+]
+
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 # python2.6 doesn't have this
 def total_days(td):
@@ -70,7 +79,10 @@ def get_review_data(root, review_id, sleep_time=SLEEP_TIME):
     for key, f in REVIEW_REQUEST_LIST_KEYS:
         data[key] = [f(item) for item in review_request[key]]
 
-    username = review_request.get_submitter()['username']
+    try:
+        username = review_request.get_submitter()['username']
+    except:
+        username = ''
     data['username'] = username
         
     # get changes
@@ -112,6 +124,20 @@ def get_review_data(root, review_id, sleep_time=SLEEP_TIME):
     review_data = []
     for review in reviews:
         comment_count = review.get_diff_comments(counts_only=True)['count']
+
+        raw_comments = _get_paged_data(review.get_diff_comments, sleep_time=sleep_time)
+        comments = []
+        for raw_comment in raw_comments:
+            comment = {}
+            for key in COMMENT_SIMPLE_KEYS:
+                comment[key] = raw_comment[key]
+
+            filediff = raw_comment.get_filediff()
+            comment['filediff'] = {
+                'source_file': filediff['source_file'],
+            }
+            comments.append(comment)
+        
         try:
             username = review.get_user()['username']
         except APIError:
@@ -124,6 +150,7 @@ def get_review_data(root, review_id, sleep_time=SLEEP_TIME):
             'timestamp': review['timestamp'],
             'id': review['id'],
             'username': username,
+            'comments': comments,
         })
     data['reviews'] = review_data
 

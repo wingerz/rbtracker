@@ -28,19 +28,27 @@ def extract_review_properties(review_request):
     data['days_until_first_review'] = 0
     data['days_until_first_shipit'] = 0
     data['days_until_last_shipit'] = 0
+    data['days_open'] = 0
 
-    if review_request['diffs'] and review_request['reviews']:
-        first_review = datetime.datetime.strptime(review_request['reviews'][0]['timestamp'], fmt)
+    if review_request['diffs']:
         first_diff_posted = datetime.datetime.strptime(review_request['diffs'][0]['timestamp'], fmt)
+        if review_request['reviews']:
+            first_review = datetime.datetime.strptime(review_request['reviews'][0]['timestamp'], fmt)
 
-        data['days_until_first_review'] = total_days(first_review - first_diff_posted)
-        
-        shipits = filter(lambda review: review['ship_it'], review_request['reviews'])
-        if shipits:
-            first_shipit = datetime.datetime.strptime(shipits[0]['timestamp'], fmt)
-            data['days_until_first_shipit'] = total_days(first_shipit - first_diff_posted)
-            last_shipit = datetime.datetime.strptime(shipits[-1]['timestamp'], fmt)
-            data['days_until_last_shipit'] = total_days(last_shipit - first_diff_posted)
+
+            data['days_until_first_review'] = total_days(first_review - first_diff_posted)
+
+            shipits = filter(lambda review: review['ship_it'], review_request['reviews'])
+            if shipits:
+                first_shipit = datetime.datetime.strptime(shipits[0]['timestamp'], fmt)
+                data['days_until_first_shipit'] = total_days(first_shipit - first_diff_posted)
+                last_shipit = datetime.datetime.strptime(shipits[-1]['timestamp'], fmt)
+                data['days_until_last_shipit'] = total_days(last_shipit - first_diff_posted)
+
+        if review_request['status'] != 'pending':
+            last_updated = datetime.datetime.strptime(review_request['last_updated'], fmt)
+            data['days_open'] = total_days(last_updated - first_diff_posted)
+
     return data
 
 def summarize(review_summaries, limit=25):
@@ -76,3 +84,9 @@ if __name__ == "__main__":
 
     summary = summarize(review_summaries)
     pprint.pprint(summary)
+
+    cols = ['review_id', 'days_open', 'days_until_first_review', 'days_until_first_shipit', 'max_comments', 'num_diffs', 'num_reviews']
+    with open('reviews.csv', 'w') as f:
+        print >>f, '\t'.join(cols)
+        for review in review_summaries:
+            print >>f, '\t'.join(unicode(review[col]) for col in cols)

@@ -18,7 +18,7 @@ def should_show_edge(review_request, review):
 def is_baz(review_request, review):
     distinctive_phrases = ['baz']
     for phrase in distinctive_phrases:
-        if any(phrase in review_request[property] for property in ['summary', 'description', 'testing_done', 'branch']):
+        if any(phrase in review_request[property] for property in ['summary', 'description', 'branch']):
             return True
 
     return False
@@ -74,6 +74,8 @@ if __name__ == "__main__":
                    help='reviews input file, one review per line')
     parser.add_argument('--teamfile', type=str, default=None,
                    help='team file, maps team name to usernames')
+    parser.add_argument('--teamoverride', type=str, default=None,
+                   help='group override mapping')
     parser.add_argument('--outputfile', type=str, default="static/reviews.json",
                    help='output file to write to')
     params = parser.parse_args()
@@ -88,13 +90,23 @@ if __name__ == "__main__":
     relevant_review_ids = set()
 
     user_to_team = {}
+
     if params.teamfile:
         with open(params.teamfile, 'r') as f:
             teams = json.loads(f.readline())
         for team_name, members in teams.iteritems():
             for member in members:
                 user_to_team[member] = team_name
-    
+
+    if params.teamoverride:
+        with open(params.teamoverride, 'r') as f:
+            team_overrides = json.loads(f.readline())
+            team_overrides_by_user = {}
+            for team, members in team_overrides.iteritems():
+                for member in members:
+                    team_overrides_by_user[member] = team
+            user_to_team.update(team_overrides_by_user)
+                
     with open(params.inputfile, 'r') as f:
         lines = f.readlines()
         for line in lines:

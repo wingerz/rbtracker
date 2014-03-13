@@ -9,7 +9,7 @@
 }
 
 .link {
-  stroke: #aaa;
+  stroke: #bbb;
   stroke-opacity: .6;
 }
 
@@ -25,7 +25,7 @@
 <script src="bower_components/d3/d3.min.js"></script>
 <script>
 
-var width = 1500,
+var width = 1200,
     height = 750;
 
 var color = d3.scale.category10();
@@ -43,7 +43,7 @@ d3.json("reviews.json", function(error, graph) {
   force
       .nodes(graph.nodes)
       .links(graph.links)
-      .linkStrength(function(l) {return Math.sqrt(l.value)/1000.;})
+      .linkStrength(function(l) {return Math.sqrt(l.value)/350.;})
       .start();
 
   var link = svg.selectAll(".link")
@@ -72,11 +72,7 @@ d3.json("reviews.json", function(error, graph) {
       .attr("dy", 0)
       .text(function(d) { return d.name; })
       .style("fill", function(d) { return color(d.group); })
-      .style("font-size", function(d) { 
-return 12 + Math.sqrt(d.reviews) + "px"; 
-});
-
-
+      .style("font-size", function(d) { return "15px";});
 
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
